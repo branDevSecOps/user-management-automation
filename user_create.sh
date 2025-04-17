@@ -35,6 +35,24 @@ tail -n +2 "$CSV_FILE" | while IFS=',' read -r username group ssh_key; do
     echo "⚠️ User '$username' already exists." | tee -a "$LOG_FILE"
   fi
 
+  # Add SSH key if provided
+  if [[ -n "$ssh_key" ]]; then
+  USER_HOME="/home/$username"
+  SSH_DIR="$USER_HOME/.ssh"
+  AUTH_KEYS="$SSH_DIR/authorized_keys"
+
+  mkdir -p "$SSH_DIR"
+  echo "$ssh_key" > "$AUTH_KEYS"
+
+  chown -R "$username":"$group" "$SSH_DIR"
+  chmod 700 "$SSH_DIR"
+  chmod 600 "$AUTH_KEYS"
+
+  echo "🔑 SSH key added for user '$username'." | tee -a "$LOG_FILE"
+else
+  echo "ℹ️ No SSH key provided for '$username'." | tee -a "$LOG_FILE"
+fi
+
 done
 
 echo "✅ Script complete. Log saved to $LOG_FILE"
