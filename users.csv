@@ -1,0 +1,4 @@
+username,group,ssh_key,status
+alice,developers,ssh-rsa AAAAB3...ACTIVE
+bob,admins,,LOCKED
+carol,developers,ssh-rsa AAAAB3...ACTIVE

@@ -1,0 +1,7 @@
+# Ignore log files and temp artifacts
+logs/
+*.log
+*.bak
+.DS_Store
+*.swp
+*.swo
