@@ -37,21 +37,32 @@ tail -n +2 "$CSV_FILE" | while IFS=',' read -r username group ssh_key; do
 
   # Add SSH key if provided
   if [[ -n "$ssh_key" ]]; then
-  USER_HOME="/home/$username"
-  SSH_DIR="$USER_HOME/.ssh"
-  AUTH_KEYS="$SSH_DIR/authorized_keys"
+    USER_HOME="/home/$username"
+    SSH_DIR="$USER_HOME/.ssh"
+    AUTH_KEYS="$SSH_DIR/authorized_keys"
 
-  mkdir -p "$SSH_DIR"
-  echo "$ssh_key" > "$AUTH_KEYS"
+    mkdir -p "$SSH_DIR"
+    echo "$ssh_key" > "$AUTH_KEYS"
 
-  chown -R "$username":"$group" "$SSH_DIR"
-  chmod 700 "$SSH_DIR"
-  chmod 600 "$AUTH_KEYS"
+    chown -R "$username":"$group" "$SSH_DIR"
+    chmod 700 "$SSH_DIR"
+    chmod 600 "$AUTH_KEYS"
 
-  echo "🔑 SSH key added for user '$username'." | tee -a "$LOG_FILE"
-else
-  echo "ℹ️ No SSH key provided for '$username'." | tee -a "$LOG_FILE"
-fi
+    echo "🔑 SSH key added for user '$username'." | tee -a "$LOG_FILE"
+  else
+    echo "ℹ️ No SSH key provided for '$username'." | tee -a "$LOG_FILE"
+  fi
+
+  # Set account status or default password
+  if [[ "$status" == "ACTIVE" ]]; then
+    echo "$username:TempP@ss123" | chpasswd
+    passwd --expire "$username"
+    echo "🔓 Account for '$username' is active with a default password (expires on first login)." | tee -a "$LOG_FILE"
+  else
+    usermod --lock "$username"
+    echo "🔒 Account for '$username' has been locked." | tee -a "$LOG_FILE"
+  fi
+
 
 done
 
